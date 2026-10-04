@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.12);--line:rgba(255,255,255,.12);--mut:#9fb0c8;--red:#ff5a6e;--grn:#2ee6a0;--acc:#7c9cff}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:#fff;height:100vh;display:flex;gap:14px;padding:14px;background:radial-gradient(900px 600px at 10% -10%,#27306b 0,transparent 60%),radial-gradient(800px 600px at 110% 110%,#0e5a5a 0,transparent 55%),#0a0f1f}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#side{width:78px;border-radius:26px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 8px}
+#side button{width:62px;padding:11px 0;border-radius:18px;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--mut);transition:.2s}
+#side button:hover{background:var(--glass2);color:#fff}
+#side button.on{background:linear-gradient(135deg,#6f8cff,#9b6bff);color:#fff;box-shadow:0 8px 20px #6f8cff55}
+#side svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#side .sp{flex:1}
+#main{flex:1;display:flex;flex-direction:column;min-width:0}
+#top{display:flex;justify-content:center;padding:2px 0 14px}
+#pill{display:flex;align-items:center;gap:4px;border-radius:999px;padding:5px}
+#pill button{width:40px;height:40px;border-radius:50%;font-size:22px;color:var(--mut);transition:.2s}
+#pill button:hover{background:var(--glass2);color:#fff}
+#lbl{min-width:200px;text-align:center;font-weight:700;font-size:16px;padding:0 10px}
+#body{flex:1;overflow:auto;padding:2px 2px 16px}
+.wk,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.wk div{text-align:center;color:var(--mut);padding:4px 0 8px;font-size:13px;font-weight:600}
+.wk div:first-child,.sun{color:var(--red)!important}
+.cell{min-height:92px;border-radius:18px;padding:10px;position:relative;cursor:pointer;background:var(--glass);border:1px solid var(--line);transition:transform .15s,background .2s}
+.cell:hover{transform:translateY(-2px);background:var(--glass2)}
+.cell.blank{background:none;border:0;pointer-events:none}
+.cell .n{font-size:16px;font-weight:700;display:inline-block;min-width:28px;text-align:center;padding:2px 0;border-radius:10px}
+.cell.today .n{background:#fff;color:#0a0f1f}
+.cell.done{background:linear-gradient(145deg,rgba(46,230,160,.32),rgba(46,230,160,.12));border-color:rgba(46,230,160,.7)}
+.cell.bad{background:linear-gradient(145deg,rgba(255,90,110,.40),rgba(255,90,110,.14));border-color:rgba(255,90,110,.8)}
+.cell .cnt{position:absolute;left:12px;bottom:9px;font-size:11px;font-weight:600;color:var(--mut)}
+.ring{position:absolute;top:9px;right:9px;width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.35);display:grid;place-items:center;transition:.2s}
+.ring svg{display:block;width:16px;height:16px;stroke:#06281c;stroke-width:3.2;fill:none;opacity:0;stroke-linecap:round;stroke-linejoin:round}
+.ring:hover{border-color:var(--grn)}
+.done .ring{background:var(--grn);border-color:var(--grn)}.done .ring svg{opacity:1}
+.year{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.mini{border-radius:20px;padding:14px}
+.mini h4{font-size:15px;margin-bottom:8px;cursor:pointer;font-weight:700}
+.mini h4:hover{color:var(--acc)}
+.mini .grid{gap:3px}
+.mini span{font-size:11px;text-align:center;padding:4px 0;border-radius:8px;cursor:pointer;font-weight:500}
+.mini span:hover{background:var(--glass2)}
+.mini span.done{background:var(--grn);color:#06281c;font-weight:700}
+.mini span.bad{background:var(--red);color:#fff;font-weight:700}
+.daycard{max-width:580px;margin:0 auto;border-radius:26px;padding:22px}
+.daycard.done{border-color:rgba(46,230,160,.7);box-shadow:0 0 0 1px rgba(46,230,160,.3),0 20px 50px rgba(46,230,160,.12)}
+.daycard.bad{border-color:rgba(255,90,110,.8);box-shadow:0 0 0 1px rgba(255,90,110,.3),0 20px 50px rgba(255,90,110,.14)}
+.dayhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.dayhead .ring{position:static;width:38px;height:38px}.dayhead .ring svg{width:20px;height:20px}
+.task{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;border-radius:16px;background:var(--glass);border:1px solid var(--line);transition:.2s}
+.task .t{flex:1;word-break:break-word;font-weight:500}
+.task.s1{background:rgba(46,230,160,.12);border-color:rgba(46,230,160,.45)}
+.task.s1 .t{color:#b9f7de}
+.task.s2{background:rgba(255,90,110,.12);border-color:rgba(255,90,110,.45)}.task.s2 .t{color:#ffc2ca;}
+.mk{width:38px;height:38px;padding:0;line-height:0;border-radius:50%;border:2px solid rgba(255,255,255,.35);display:grid;place-items:center;transition:.2s;flex:none}
+.mk svg{display:block;width:22px;height:22px;fill:none;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;opacity:0;stroke:#06281c}
+.mk:hover{border-color:var(--grn)}
+.mk.on1{background:var(--grn);border-color:var(--grn)}.mk.on1 svg{opacity:1}
+.mk.on2{background:var(--red);border-color:var(--red)}.mk.on2 svg{opacity:1;stroke:#fff}
+.add{display:flex;gap:8px;margin-top:14px}
+.add input{flex:1;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:#fff;font:inherit}
+.add input::placeholder{color:var(--mut)}
+.add button,dialog button{background:linear-gradient(135deg,#6f8cff,#9b6bff);border-radius:14px;padding:11px 18px;font-weight:700}
+dialog{margin:auto;background:#141b33;color:#fff;border:1px solid var(--line);border-radius:26px;padding:22px;width:min(92vw,460px);max-height:88vh;overflow:auto;box-shadow:0 30px 80px #000a}
+dialog::backdrop{background:rgba(5,8,18,.65);backdrop-filter:blur(4px)}
+dialog p{margin-bottom:16px;font-weight:600;line-height:1.4}
+dialog .row{display:flex;gap:8px;flex-wrap:wrap}
+dialog button.y{background:var(--grn);color:#06281c}dialog button.r{background:var(--red)}dialog button.g{background:var(--glass2)}
+.empty{color:var(--mut);padding:8px 0 4px;font-size:14px}
+#auth{flex:1;display:flex;align-items:center;justify-content:center}
+body:not(.out) #auth{display:none}
+body.out #side,body.out #main{display:none}
+.authcard{width:min(92vw,400px);border-radius:28px;padding:30px 26px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.authcard .logo{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,#6f8cff,#9b6bff);box-shadow:0 10px 26px #6f8cff55}
+.authcard .logo svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.authcard h1{font-size:24px;font-weight:800}
+.authcard .sub{color:var(--mut);font-size:14px;line-height:1.4}
+.authcard input{width:100%;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:13px 14px;color:#fff;font:inherit}
+.authcard input::placeholder{color:var(--mut)}
+.authcard .primary{width:100%;background:linear-gradient(135deg,#6f8cff,#9b6bff);border-radius:14px;padding:13px;font-weight:700}
+#err{color:var(--red);font-size:13px}
+.alt{color:var(--mut);font-size:14px}.alt a{color:#fff;font-weight:700;cursor:pointer;text-decoration:underline}
+#gbtn{display:flex;justify-content:center;min-height:0}
+@media(max-width:560px){body{padding:8px;gap:8px}#side{width:58px;border-radius:20px;padding:10px 4px}#side button{width:50px;font-size:10px}.cell{min-height:64px;padding:6px;border-radius:12px}.cell .n{font-size:13px}.ring{width:20px;height:20px;top:5px;right:5px}.ring svg{width:11px;height:11px}.wk,.grid{gap:4px}#lbl{min-width:150px;font-size:14px}.cell .cnt{left:6px;font-size:9px}}
+</style>
+</head>
+<body class="out">
+<div id="auth"></div>
+<nav id="side" class="glass"></nav>
+<div id="main"><div id="top"><div id="pill" class="glass"><button id="prev" aria-label="Previous">‹</button><div id="lbl"></div><button id="next" aria-label="Next">›</button></div></div><div id="body"></div></div>
+<script>window.onGoogleLibraryLoad=()=>{if(document.body.classList.contains("out"))setupGoogle()}</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+const MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const DF=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const TICK='<svg viewBox="0 0 24 24"><path d="M6.5 12.5l3.8 3.8 7.2-8"/></svg>';
+const CROSS='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+let S={done:{},tasks:{}},view="month",cur=new Date();cur.setHours(12,0,0,0);
+const $=s=>document.querySelector(s);
+const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const bad=k=>(S.tasks[k]||[]).some(t=>t.s!==1);
+const todayK=key(new Date());
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+
+/* ---- Netlify database (Blobs) + login ---- */
+let tok=localStorage.getItem("cal_tok"),gid="",loaded=false,timer;
+const H=()=>({"Content-Type":"application/json",Authorization:"Bearer "+tok});
+function save(){if(!loaded)return;clearTimeout(timer);timer=setTimeout(()=>fetch("/api/data",{method:"PUT",headers:H(),body:JSON.stringify(S)}).then(r=>{if(r.status===401)logout()}).catch(()=>{}),300)}
+async function load(){try{const r=await fetch("/api/data",{headers:H()});if(r.status===401)return logout();S=await r.json();loaded=true}catch(e){return logout()}
+S.done=S.done||{};S.tasks=S.tasks||{};document.body.classList.remove("out");render()}
+function logout(){localStorage.removeItem("cal_tok");tok=null;loaded=false;S={done:{},tasks:{}};document.body.classList.add("out");showAuth("login")}
+async function authCall(body){const e=$("#err");if(e)e.textContent="";
+ try{const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json();
+  if(!r.ok){if(e)e.textContent=j.error||"Something went wrong";return}
+  tok=j.token;localStorage.setItem("cal_tok",tok);load()}catch(x){if(e)e.textContent="Network error. Please try again."}}
+function showAuth(m){const a=$("#auth"),L=m==="login";
+ a.innerHTML=`<div class="authcard glass"><div class="logo"><svg viewBox="0 0 24 24">${IC.year}</svg></div><h1>My Calendar</h1><p class="sub">${L?"Log in with your email to open your calendar":"Create your account with just your email"}</p><input id="em" type="email" placeholder="you@example.com" autocomplete="email"><div id="err"></div><button id="go" class="primary">${L?"Log in":"Sign up"}</button><div id="gbtn"></div><p class="alt">${L?"New here? <a id='sw'>Sign up as new</a>":"Already have an account? <a id='sw'>Log in</a>"}</p></div>`;
+ const go=()=>authCall({mode:L?"login":"signup",email:$("#em").value});
+ $("#go").onclick=go;$("#em").onkeydown=e=>{if(e.key==="Enter")go()};$("#sw").onclick=()=>showAuth(L?"signup":"login");
+ setupGoogle(L)}
+function setupGoogle(prompt=true){if(!gid||!window.google||!google.accounts)return;
+ google.accounts.id.initialize({client_id:gid,callback:r=>authCall({credential:r.credential}),auto_select:false});
+ const g=$("#gbtn");if(g)google.accounts.id.renderButton(g,{theme:"filled_black",size:"large",shape:"pill",width:300});
+ if(prompt)google.accounts.id.prompt()}
+async function init(){try{gid=(await (await fetch("/api/config")).json()).googleClientId||""}catch(e){}
+ if(tok)load();else showAuth("login")}
+
+/* ---- dialogs ---- */
+function ask(msg,opts){return new Promise(res=>{const d=el("dialog");d.append(el("p","",msg));const r=el("div","row");
+opts.forEach(o=>{const b=el("button",o.c||"",o.t);b.onclick=()=>{d.close();d.remove();res(o.v)};r.append(b)});d.append(r);
+d.oncancel=()=>{d.remove();res(null)};document.body.append(d);d.showModal()})}
+
+async function toggleDone(k){
+ if(!S.done[k])S.done[k]=1;
+ else if(await ask("Do you want to turn this day off?",[{t:"Yes",v:1,c:"y"},{t:"No",v:0,c:"g"}]))delete S.done[k];
+ save();render()}
+
+async function markTask(k,task){
+ if(!task.s)task.s=1;
+ else{const v=await ask("What would you like to do with this task?",[{t:task.s===1?"Keep Right":"Make Right",v:1,c:"y"},{t:task.s===2?"Keep Wrong":"Make Wrong",v:2,c:"r"},{t:"Remove",v:"del",c:"g"},{t:"Cancel",v:null,c:"g"}]);
+  if(v===null)return;
+  if(v==="del")S.tasks[k]=S.tasks[k].filter(x=>x.id!==task.id);else task.s=v}
+ save();render()}
+
+function taskPanel(box,k){
+ box.innerHTML="";const list=S.tasks[k]||[];
+ if(!list.length)box.append(el("div","empty","No tasks yet. Add your first one below."));
+ list.forEach(t=>{const row=el("div","task s"+(t.s||0));row.append(el("div","t",t.text));
+  const ok=el("button","mk"+(t.s?" on"+t.s:""));ok.setAttribute("aria-label","Mark task");ok.innerHTML=t.s===2?CROSS:TICK;
+  ok.onclick=async()=>{await markTask(k,t);taskPanel(box,k)};row.append(ok);box.append(row)});
+ const f=el("div","add"),i=el("input");i.placeholder="Write a new task";const b=el("button","","Add");
+ const add=()=>{const v=i.value.trim();if(!v)return;(S.tasks[k]=S.tasks[k]||[]).push({id:Date.now()+Math.random(),text:v,s:0});save();taskPanel(box,k);render();box.querySelector("input").focus()};
+ b.onclick=add;i.onkeydown=e=>{if(e.key==="Enter")add()};f.append(i,b);box.append(f)}
+
+function openDay(k){
+ const [y,m,d]=k.split("-").map(Number),dt=new Date(y,m-1,d);
+ const dlg=el("dialog"),h=el("p","",`${DF[dt.getDay()]}, ${d} ${MN[m-1]} ${y}`);if(dt.getDay()===0)h.className="sun";
+ const box=el("div"),c=el("button","g","Close");c.style.marginTop="14px";c.onclick=()=>{dlg.close();dlg.remove()};
+ dlg.append(h,box,c);dlg.onclose=()=>dlg.remove();document.body.append(dlg);taskPanel(box,k);dlg.showModal()}
+
+/* ---- views ---- */
+function ring(k){const r=el("button","ring");r.innerHTML=TICK;r.setAttribute("aria-label","Mark day complete");r.onclick=e=>{e.stopPropagation();toggleDone(k)};return r}
+function monthView(root){
+ const w=el("div","wk");DN.forEach(n=>w.append(el("div","",n)));root.append(w);
+ const g=el("div","grid"),y=cur.getFullYear(),m=cur.getMonth(),first=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();
+ for(let i=0;i<first;i++)g.append(el("div","cell blank"));
+ for(let d=1;d<=n;d++){const dt=new Date(y,m,d),k=key(dt),c=el("div","cell"+(S.done[k]?" done":"")+(bad(k)?" bad":"")+(k===todayK?" today":""));
+  c.tabIndex=0;c.append(el("span","n"+(dt.getDay()===0&&k!==todayK?" sun":""),d),ring(k));
+  const t=(S.tasks[k]||[]).length;if(t)c.append(el("span","cnt",t+(t>1?" tasks":" task")));
+  c.onclick=()=>openDay(k);c.onkeydown=e=>{if(e.key==="Enter")openDay(k)};g.append(c)}
+ root.append(g)}
+function yearView(root){
+ const wrap=el("div","year"),y=cur.getFullYear();
+ for(let m=0;m<12;m++){const card=el("div","mini glass"),h=el("h4","",MN[m]);h.onclick=()=>{cur=new Date(y,m,1,12);view="month";render()};card.append(h);
+  const g=el("div","grid");DN.forEach((n,i)=>g.append(el("span",i===0?"sun":"",n[0])));
+  const first=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();
+  for(let i=0;i<first;i++)g.append(el("span"));
+  for(let d=1;d<=n;d++){const dt=new Date(y,m,d),k=key(dt),s=el("span",(dt.getDay()===0?"sun ":"")+(S.done[k]?"done ":"")+(bad(k)?"bad":""),d);s.onclick=()=>openDay(k);g.append(s)}
+  card.append(g);wrap.append(card)}
+ root.append(wrap)}
+function dayView(root){
+ const k=key(cur),c=el("div","daycard glass"+(S.done[k]?" done":"")+(bad(k)?" bad":"")),h=el("div","dayhead"),t=el("div",cur.getDay()===0?"sun":"",`${cur.getDate()} ${MN[cur.getMonth()]} ${cur.getFullYear()}`);
+ t.style.cssText="font-size:22px;font-weight:800";h.append(t,ring(k));
+ const box=el("div");c.append(h,box);root.append(c);taskPanel(box,k)}
+
+function render(){
+ const b=$("#body");b.innerHTML="";
+ if(view==="year"){$("#lbl").textContent=cur.getFullYear();yearView(b)}
+ else if(view==="month"){$("#lbl").textContent=MN[cur.getMonth()]+" "+cur.getFullYear();monthView(b)}
+ else{$("#lbl").textContent=`${DF[cur.getDay()]}, ${cur.getDate()} ${MN[cur.getMonth()]} ${cur.getFullYear()}`;dayView(b)}
+ document.querySelectorAll("#side [data-v]").forEach(x=>x.classList.toggle("on",x.dataset.v===view))}
+function step(n){if(view==="year")cur.setFullYear(cur.getFullYear()+n);else if(view==="month"){cur.setDate(1);cur.setMonth(cur.getMonth()+n)}else cur.setDate(cur.getDate()+n);render()}
+$("#prev").onclick=()=>step(-1);$("#next").onclick=()=>step(1);
+
+const IC={year:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4M8 14h2M14 14h2M8 18h2M14 18h2"/>',month:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/>',day:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4M12 14v4"/>',today:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
+const side=$("#side");
+[["year","Year"],["month","Month"],["day","Day"]].forEach(([v,n])=>{const b=el("button");b.dataset.v=v;b.innerHTML=`<svg viewBox="0 0 24 24">${IC[v]}</svg><span>${n}</span>`;b.onclick=()=>{view=v;render()};side.append(b)});
+side.append(el("div","sp"));
+const ob=el("button");ob.innerHTML=`<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Log out</span>`;ob.onclick=logout;
+const tb=el("button");tb.innerHTML=`<svg viewBox="0 0 24 24">${IC.today}</svg><span>Today</span>`;tb.onclick=()=>{cur=new Date();cur.setHours(12,0,0,0);render()};side.append(tb,ob);
+init();
+</script>
+</body>
+</html>
