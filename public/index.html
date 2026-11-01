@@ -291,7 +291,7 @@ const TL_V={"अ":"a","आ":"aa","इ":"i","ई":"i","उ":"u","ऊ":"u","ऋ":"
 const TL_M={"ा":"a","ि":"i","ी":"i","ु":"u","ू":"u","ृ":"ri","े":"e","ै":"ai","ो":"o","ौ":"au","ॉ":"o","ॅ":"e"};
 function tlWord(w){
  w=w.normalize("NFD").replace(/ज्ञ/g,"ग्य");
- if(TL_D[w])return TL_D[w];
+ const L=tlLook(w);if(L)return L;
  const T=[];let i=0;
  while(i<w.length){const ch=w[i];
   if(TL_C[ch]){let r=TL_C[ch];i++;
@@ -315,7 +315,291 @@ function tlWord(w){
   if(t.x){out+=t.c;return}
   out+=t.c+(t.v!==null?t.v:(t.inh?"a":""))});
  return out}
-function tlText(s){return s.replace(/[ऀ-ॿ]+/g,tlWord).replace(/\s+/g," ").trim()}
+/* ---- student/daily-life dictionary: roman=variant1,variant2 (variants include common mis-hearings) ---- */
+const TL_EXTRA=`padhai=पढ़ाई,पढाई,पराई,पड़ाई,पढई,पढ़ाइ,परहाई,पढ़ाए,पड़ाइ,परई,पढ़ाइ
+padhna=पढ़ना,पढना,परना,पढ़ना
+padhne=पढ़ने,पढने,परने
+padhai karna=पढ़ाईकरना,पराईकरना
+likhna=लिखना,लीखना
+likhai=लिखाई,लिखाइ
+yaad=याद,याध
+yaad karna=यादकरना
+revision=रिवीजन,रिविजन,रिवीज़न,रीवीजन,रिवीजिन,रिवीज़न
+homework=होमवर्क,होम वर्क,होमवर्कः,होमवार्क,होमवर्कस
+assignment=असाइनमेंट,असाईनमेंट,असाइन्मेंट,असाइनमेन्ट,असाइमेंट,एसाइनमेंट,असाइनमेन्ट
+project=प्रोजेक्ट,प्रोजैक्ट,प्रोजेक्ट्स,प्रॉजेक्ट,प्रोजेकट
+presentation=प्रेजेंटेशन,प्रेजेन्टेशन,प्रेसेंटेशन,प्रजेंटेशन,प्रेजेंटेसन,पीपीटी
+ppt=पीपीटी,पी पी टी
+notes=नोट्स,नोटस,नोट्स,नोटिस
+note=नोट
+notebook=नोटबुक,नोट बुक
+copy=कॉपी,कापी,कोपी,कौपी
+book=बुक
+kitab=किताब,किताबः
+kitabein=किताबें,किताबे,किताबों
+pen=पेन
+pencil=पेंसिल,पेन्सिल,पेंसल
+eraser=इरेज़र,इरेजर,इरेसर
+rubber=रबर
+scale=स्केल,स्कैल
+bag=बैग,बेग
+school=स्कूल,सकूल,स्कुल
+college=कॉलेज,कालेज,कोलेज,कॉलिज,कालिज
+university=यूनिवर्सिटी,युनिवर्सिटी,यूनिवर्सिटि
+class=क्लास,क्लॉस,कलास,क्लाश
+classes=क्लासेस,क्लासेज,क्लासिस
+coaching=कोचिंग,कोचींग,कोचिन्ग
+tuition=ट्यूशन,टियूशन,ट्यूसन,ट्यूशन,टूशन,ट्युशन
+teacher=टीचर,टीचार,टिचर
+sir=सर
+madam=मैडम,मेडम
+mam=मैम,मेम
+principal=प्रिंसिपल,प्रिन्सिपल,प्रिंसीपल
+lecture=लेक्चर,लेकचर,लैक्चर
+period=पीरियड,पीरीयड,पिरियड
+lab=लैब,लेब
+library=लाइब्रेरी,लायब्रेरी,लाईब्रेरी,लाइब्रैरी
+canteen=कैंटीन,कैन्टीन,कैंटिन
+hostel=हॉस्टल,हास्टल,होस्टल
+exam=एग्जाम,एग्ज़ाम,एक्जाम,इग्जाम,एक्ज़ाम,एक्सेम,एग्ज़ैम,इक्जाम,इग्ज़ाम,एग्जैम
+exams=एग्जामस,एग्जाम्स,एक्जाम्स
+pariksha=परीक्षा,परिक्षा,परीक्छा
+test=टेस्ट,टैस्ट
+quiz=क्विज़,क्विज,क्वीज
+result=रिजल्ट,रिज़ल्ट,रिज़ल्ट,रिसल्ट
+marks=मार्क्स,मार्कस,मार्क्स
+marksheet=मार्कशीट,मार्क शीट,मार्कशिट
+admit card=एडमिटकार्ड,एडमिट कार्ड,एडमीटकार्ड
+hall ticket=हॉलटिकट,हॉल टिकट,हालटिकट
+syllabus=सिलेबस,सिलेबेस,सिलैबस,सीलेबस,सिलेबॉस,सिलबस
+chapter=चैप्टर,चेप्टर,चैपटर,चैप्टर
+topic=टॉपिक,टापिक,टोपिक,टॉपिक्स
+subject=सब्जेक्ट,सबजेक्ट,सब्जैक्ट,सब्जेक्ट्स
+maths=मैथ्स,मैथ,मैथस,मैथ्स,मेथ्स
+ganit=गणित,गडित
+science=साइंस,सांइस,साईंस,सायंस
+physics=फिजिक्स,फिज़िक्स,फिज़िक्स
+chemistry=केमिस्ट्री,कैमिस्ट्री,कैमिस्ट्री
+biology=बायोलॉजी,बायोलोजी,बायोलोजि
+english=इंग्लिश,इंग्लीश,इन्ग्लिश
+angrezi=अंग्रेजी,अंग्रेज़ी,अंग्रेजि
+hindi=हिंदी,हिन्दी,हिंदि
+sanskrit=संस्कृत,संसकृत
+history=हिस्ट्री,हिस्टरी
+itihas=इतिहास
+geography=ज्योग्राफी,जियोग्राफी,जॉग्राफी
+bhugol=भूगोल
+civics=सिविक्स
+economics=इकोनॉमिक्स,इकोनोमिक्स,इकनॉमिक्स
+computer=कंप्यूटर,कम्प्यूटर,कंपूटर,कमप्यूटर,कंप्यूटर
+coding=कोडिंग,कोडींग
+programming=प्रोग्रामिंग,प्रोग्रामींग
+internet=इंटरनेट,इन्टरनेट
+rscit=आरएससीआईटी,आर एस सी आई टी,आरएसआईटी
+practical=प्रैक्टिकल,प्रेक्टिकल,प्रैक्टीकल,प्रैक्टिकल
+theory=थ्योरी,थियरी,थ्यौरी
+viva=वाइवा,वायवा,वाईवा
+seminar=सेमिनार,सैमिनार
+workshop=वर्कशॉप,वर्कशाप,वर्कशोप
+competition=कंपटीशन,कम्पटीशन,कॉम्पिटिशन,कम्पीटिशन,कंपीटिशन
+interview=इंटरव्यू,इन्टरव्यू,इंटरव्यु
+resume=रिज्यूमे,रिज़्यूमे,रेज्यूमे,रिज्यूम
+biodata=बायोडाटा,बायो डाटा
+form=फॉर्म,फार्म,फोर्म
+fees=फीस,फ़ीस,फीसें,फिस
+scholarship=स्कॉलरशिप,स्कालरशिप,स्कोलरशिप
+admission=एडमिशन,एडमीशन,एडमिसन
+registration=रजिस्ट्रेशन,रजिस्ट्रैशन,रजिस्ट्रेसन
+certificate=सर्टिफिकेट,सर्टीफिकेट,सर्टिफ़िकेट,सर्टिफिकेट
+degree=डिग्री,डिगरी
+diploma=डिप्लोमा,डिपलोमा
+course=कोर्स,कोरस
+batch=बैच,बेच
+timetable=टाइमटेबल,टाइम टेबल,टाईमटेबल
+schedule=शेड्यूल,स्केड्यूल,शैड्यूल,शेडयूल
+deadline=डेडलाइन,डैडलाइन,डेडलायन
+submission=सबमिशन
+upload=अपलोड
+download=डाउनलोड,डाउनलोड
+print=प्रिंट,प्रिन्ट
+printout=प्रिंटआउट,प्रिंट आउट
+xerox=ज़ेरॉक्स,जेरॉक्स,ज़ेरोक्स,जेरोक्स,जीरोक्स,ज़ीरॉक्स
+photocopy=फोटोकॉपी,फोटो कॉपी
+pdf=पीडीएफ,पी डी एफ
+zoom=ज़ूम,जूम
+google meet=गूगलमीट,गूगल मीट
+whatsapp=व्हाट्सएप,वाट्सएप,व्हाट्सऐप,व्हाट्सअप,वॉट्सऐप,वाट्सअप
+youtube=यूट्यूब,यूटयूब,यूट्युब
+video=वीडियो,विडियो
+mobile=मोबाइल,मोबाईल
+laptop=लैपटॉप,लेपटॉप
+charger=चार्जर,चारजर
+wifi=वाईफाई,वाई फाई,वाइफाई
+recharge=रिचार्ज,रीचार्ज
+data=डेटा,डाटा
+nashta=नाश्ता,नास्ता
+khana=खाना
+chai=चाय
+paani=पानी
+doodh=दूध
+sabzi=सब्जी,सब्ज़ी,सबजी
+fruits=फ्रूट्स,फ्रूटस
+kapde=कपड़े,कपरे,कपडे
+safai=सफाई,सफ़ाई
+nahana=नहाना
+sona=सोना
+uthna=उठना
+jaldi=जल्दी,जलदी
+der=देर
+tayyari=तैयारी,तियारी,तैयारि
+mehnat=मेहनत,मैनत
+chutti=छुट्टी,छुट्टि
+holiday=हॉलिडे,होलीडे,हॉलीडे
+sunday=संडे,सनडे
+monday=मंडे,मनडे
+tuesday=ट्यूज़डे,ट्यूसडे,टयूजडे
+wednesday=वेडनेसडे,वेनसडे,वेडनसडे
+thursday=थर्सडे,थरसडे
+friday=फ्राइडे,फ्राईडे,फ्रायडे
+saturday=सैटरडे,सेटरडे,सैटर्डे
+somvar=सोमवार
+mangalvar=मंगलवार
+budhvar=बुधवार
+guruvar=गुरुवार,बृहस्पतिवार
+veervar=वीरवार
+shukravar=शुक्रवार
+shanivar=शनिवार
+ravivar=रविवार
+anniversary=एनिवर्सरी,एनीवर्सरी
+function=फंक्शन,फन्क्शन
+shaadi=शादी,शादि
+mela=मेला
+festival=फेस्टिवल,फेस्टीवल,फेस्टिवल
+diwali=दिवाली,दिवाळी
+holi=होली
+hospital=हॉस्पिटल,हास्पिटल,होस्पिटल
+medicine=मेडिसिन,मेडीसिन
+checkup=चेकअप,चेक अप
+bijli=बिजली
+rent=रेंट
+kiraya=किराया
+salary=सैलरी,सेलरी
+bus=बस
+flight=फ्लाइट,फ्लाईट
+station=स्टेशन,स्टैशन
+petrol=पेट्रोल,पैट्रोल
+bike=बाइक,बाईक
+cycle=साइकिल,साइकल,साईकिल
+yoga=योग,योगा
+exercise=एक्सरसाइज,एक्सर्साइज,एक्सरसाईज
+running=रनिंग
+walk=वॉक,वाक
+cricket=क्रिकेट,क्रिकेट
+football=फुटबॉल,फुटबाल
+match=मैच,मेच
+game=गेम
+practice=प्रैक्टिस,प्रेक्टिस,प्रैक्टीस
+movie=मूवी,मूवि
+film=फिल्म,फ़िल्म
+friend=फ्रेंड,फ्रैंड
+friends=फ्रेंड्स,फ्रैंड्स
+mummy=मम्मी
+papa=पापा
+bhai=भाई
+behen=बहन
+dost=दोस्त
+atm=एटीएम,ए टी एम
+gas=गैस
+cylinder=सिलेंडर,सिलिंडर
+dukaan=दुकान
+saman=सामान
+order=ऑर्डर,आर्डर
+delivery=डिलीवरी,डिलिवरी
+aana=आना
+milna=मिलना
+dekhna=देखना
+sunna=सुनना
+bhejna=भेजना
+bolna=बोलना
+puchna=पूछना
+batana=बताना
+lana=लाना
+rakhna=रखना
+jama=जमा
+wapas=वापस
+banana=बनाना
+sikhna=सीखना,सिखना
+khelna=खेलना
+ghumna=घूमना
+samay=समय
+zaroori=ज़रूरी,जरूरी,जरुरी
+important=इम्पोर्टेंट,इंपोर्टेंट,इम्पोर्टेन्ट
+urgent=अर्जेंट,अरजेंट
+alarm=अलार्म,अलारम
+timer=टाइमर
+list=लिस्ट
+pending=पेंडिंग
+done=डन
+complete=कंप्लीट,कम्प्लीट
+abhi=अभी
+phir=फिर
+pehle=पहले
+baad=बाद
+tak=तक
+liye=लिए,लिये
+saath=साथ
+sab=सब
+kuch=कुछ
+koi=कोई
+jab=जब
+tab=तब
+ab=अब
+yahan=यहाँ,यहां
+wahan=वहाँ,वहां
+kahan=कहाँ,कहां
+kab=कब
+kaise=कैसे
+kyun=क्यों
+kitne=कितने
+ho=हो
+tha=था
+thi=थी
+gaya=गया
+gayi=गई,गयी
+hoon=हूँ,हूं
+chahiye=चाहिए,चाहिये
+hoga=होगा
+raha=रहा
+rahi=रही
+wala=वाला
+ek=एक
+do=दो
+teen=तीन`;
+const TL_S={};
+function tlSk(w){
+ w=w.normalize("NFD").replace(/\s+/g,"");
+ w=w.replace(/[डढ]़/g,"र").replace(/[ऀ-ॿ]/g,c=>({"़":"","ं":"","ँ":"","ः":"","्":"","ी":"ि","ू":"ु","ै":"े","ौ":"ो","ॉ":"ो","ॅ":"े","ई":"इ","ऊ":"उ","ऐ":"ए","औ":"ओ","ऑ":"ओ","ऍ":"ए","ड":"र","ढ":"र","र":"र","ट":"त","ठ":"थ","ण":"न","श":"स","ष":"स","ळ":"ल"}[c]??c));
+ return w.replace(/(.)\1+/g,"$1")}
+(function(){
+ const add=(v,r)=>{const e=v.replace(/\s+/g,"").normalize("NFD");if(!(e in TL_D))TL_D[e]=r;const k=tlSk(v);if(k.length>=3&&!(k in TL_S))TL_S[k]=r};
+ for(const k in TL_RAW)add(k,TL_RAW[k]);
+ TL_EXTRA.split("\n").forEach(l=>{const i=l.indexOf("=");if(i<1)return;const r=l.slice(0,i).trim();l.slice(i+1).split(",").forEach(v=>{v=v.trim();if(v)add(v,r)})})
+})();
+function tlLook(w){
+ const e=w.replace(/\s+/g,"").normalize("NFD");if(TL_D[e])return TL_D[e];
+ const k=tlSk(w);return k.length>=3&&TL_S[k]?TL_S[k]:null}
+const DEV=/[ऀ-ॿ]/,DEVW=/^[ऀ-ॿ]+$/;
+function tlText(s){
+ const t=s.trim().split(/\s+/),out=[];
+ for(let i=0;i<t.length;){
+  if(DEVW.test(t[i])){
+   let hit=null,n=0;
+   for(const m of [3,2]){if(i+m<=t.length&&t.slice(i,i+m).every(x=>DEVW.test(x))){const L=tlLook(t.slice(i,i+m).join(""));if(L){hit=L;n=m;break}}}
+   if(hit){out.push(hit);i+=n;continue}}
+  out.push(DEV.test(t[i])?t[i].replace(/[ऀ-ॿ]+/g,tlWord):t[i]);i++}
+ return out.join(" ").replace(/\s+/g," ").trim()}
+function tlScore(s){return s.trim().split(/\s+/).filter(x=>DEVW.test(x)&&tlLook(x)).length}
+function tlPick(res){let best=res[0].transcript,sc=-1;for(let j=0;j<res.length;j++){const c=tlScore(res[j].transcript);if(c>sc){sc=c;best=res[j].transcript}}return best}
 /*/TL*/
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let rec=null;
@@ -324,9 +608,9 @@ function listen(btn,input,done){
  if(!SR)return ask("Voice input is not supported in this browser. Please open the site in Chrome (Android or desktop).",OK);
  if(rec){try{rec.stop()}catch(e){}return}
  const r=new SR(),lab=btn.querySelector("span"),old=input.placeholder;let err="";
- rec=r;r.lang="hi-IN";r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+ rec=r;r.lang="hi-IN";r.interimResults=true;r.continuous=false;r.maxAlternatives=5;
  r.onstart=()=>{btn.classList.add("rec");lab.textContent="Listening… tap to stop";input.value="";input.placeholder="Speak your task now"};
- r.onresult=e=>{let t="";for(let j=0;j<e.results.length;j++)t+=e.results[j][0].transcript+" ";input.value=tlText(t)};
+ r.onresult=e=>{let t="";for(let j=0;j<e.results.length;j++)t+=tlPick(e.results[j])+" ";input.value=tlText(t)};
  r.onerror=e=>{err=e.error||"error"};
  r.onend=()=>{if(r._x)return;rec=null;btn.classList.remove("rec");lab.textContent="Speak";input.placeholder=old;
   const txt=input.value.trim();
