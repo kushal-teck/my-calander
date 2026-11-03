@@ -163,6 +163,45 @@ dialog{max-height:88vh;max-height:88dvh}
 .daycard{width:100%}
 body{padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(14px,env(safe-area-inset-bottom))}
 @media(max-width:560px){body{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}}
+/* ===== Mobile-only layout: phone-width column, big easy-to-read dates ===== */
+html{background:#0a0f1f}
+body{font-size:16px;padding:max(10px,env(safe-area-inset-top)) max(10px,calc((100vw - 480px)/2 + 10px)) max(10px,env(safe-area-inset-bottom))}
+input{font-size:16px}
+#pill button{width:46px;height:46px;font-size:26px}
+#lbl{font-size:17px;font-weight:800}
+.wk,.grid{gap:5px}
+.wk div{font-size:13px;font-weight:700;padding:2px 0 8px}
+.mview{min-height:440px}
+.mview .grid{gap:5px}
+.mview .cell{padding:5px 2px;border-radius:12px;align-items:center;justify-content:center;gap:3px}
+.ct{flex-direction:column;align-items:center;gap:3px}
+.cell .n{font-size:20px;font-weight:800;line-height:1.2;min-width:32px;padding:2px 0;text-align:center}
+.ring{width:22px;height:22px}
+.cell .cnt{font-size:11px;text-align:center}
+.cnt b{padding:1px 7px;font-size:12px}
+.year{grid-template-columns:1fr;gap:14px}
+.mini{padding:16px}
+.mini h4{font-size:19px;margin-bottom:12px}
+.mini .grid{gap:4px}
+.mini span{font-size:16px;font-weight:700;padding:9px 0;border-radius:10px}
+.daycard{padding:18px;border-radius:22px}
+.task{padding:14px}
+.task .t{font-size:17px}
+.mk{width:44px;height:44px}.mk svg{width:26px;height:26px}
+dialog p{font-size:18px}
+dialog button,.add button{font-size:16px}
+.ctag{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:8px;background:var(--glass2);color:var(--acc);vertical-align:middle}
+.cview .add input{flex:1 1 100%}
+.chint{font-size:14px;line-height:1.5;color:var(--mut);margin-bottom:6px}
+.chd{font-size:16px;font-weight:800;margin:20px 2px 10px}
+.ctask{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:10px;border-radius:18px;background:var(--glass);border:1px solid var(--line)}
+.ct1{flex:1;min-width:0}
+.ctask .t{font-size:17px;font-weight:600;word-break:break-word}
+.cm{font-size:13px;color:var(--mut);margin-top:4px}
+.cstop{flex:none;padding:10px 16px;border-radius:12px;font-weight:700;background:rgba(255,90,110,.18);border:1px solid rgba(255,90,110,.5);color:#ffc2ca}
+.ctask.stopped{opacity:.55;border-style:dashed;pointer-events:none;user-select:none;-webkit-user-select:none}
+#pill.cons #prev,#pill.cons #next{visibility:hidden}
+.mview{flex:0 0 auto}.mview .grid{flex:0 0 auto;grid-template-rows:repeat(var(--rows,6),minmax(78px,96px))}
 </style>
 </head>
 <body class="out">
@@ -180,7 +219,9 @@ const CROSS='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 let S={done:{},tasks:{}},view="month",cur=new Date();cur.setHours(12,0,0,0);
 const $=s=>document.querySelector(s);
 const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-const bad=k=>(S.tasks[k]||[]).some(t=>t.s!==1);
+const consOn=k=>(S.cons||[]).filter(c=>c.start<=k&&(!c.end||k<=c.end));
+const cmark=(k,c)=>((S.cm||{})[k]||{})[c.id]||0;
+const bad=k=>(S.tasks[k]||[]).some(t=>t.s!==1)||(k<=todayK&&consOn(k).some(c=>cmark(k,c)!==1));
 const todayK=key(new Date());
 function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 
@@ -189,7 +230,7 @@ let vapid="",tok=localStorage.getItem("cal_tok"),gid="",loaded=false,timer;
 const H=()=>({"Content-Type":"application/json",Authorization:"Bearer "+tok});
 function save(){if(!loaded)return;clearTimeout(timer);timer=setTimeout(()=>fetch("/api/data",{method:"PUT",headers:H(),body:JSON.stringify(S)}).then(r=>{if(r.status===401)logout()}).catch(()=>{}),300)}
 async function load(){try{const r=await fetch("/api/data",{headers:H()});if(r.status===401)return logout();S=await r.json();loaded=true}catch(e){return logout()}
-S.done=S.done||{};S.tasks=S.tasks||{};document.body.classList.remove("out");render();refreshBell();if("Notification" in window&&Notification.permission==="granted")ensureAlerts(false)}
+S.done=S.done||{};S.tasks=S.tasks||{};S.cons=S.cons||[];S.cm=S.cm||{};document.body.classList.remove("out");render();refreshBell();if("Notification" in window&&Notification.permission==="granted")ensureAlerts(false)}
 function logout(){const t=tok;
  if(t&&navigator.serviceWorker)navigator.serviceWorker.getRegistration().then(r=>r&&r.pushManager.getSubscription()).then(s=>{if(s){fetch("/api/push",{method:"DELETE",headers:{"Content-Type":"application/json",Authorization:"Bearer "+t},body:JSON.stringify({endpoint:s.endpoint})}).catch(()=>{});s.unsubscribe()}}).catch(()=>{});
  localStorage.removeItem("cal_tok");tok=null;loaded=false;S={done:{},tasks:{}};document.body.classList.add("out");showAuth("login")}
@@ -267,9 +308,44 @@ async function markTask(k,task){
   if(v==="del")S.tasks[k]=S.tasks[k].filter(x=>x.id!==task.id);else task.s=v}
  save();render()}
 
+async function markCons(k,c){
+ S.cm=S.cm||{};const m=S.cm[k]=S.cm[k]||{};
+ if(!m[c.id])m[c.id]=1;
+ else{const v=await ask("What would you like to do with this task?",[{t:m[c.id]===1?"Keep Right":"Make Right",v:1,c:"y"},{t:m[c.id]===2?"Keep Wrong":"Make Wrong",v:2,c:"r"},{t:"Cancel",v:null,c:"g"}]);
+  if(v===null)return;m[c.id]=v}
+ save();render()}
+async function stopCons(c){
+ const v=await ask("Stop this task? It will not appear on new days after today. It will always stay listed in this section.",[{t:"Yes, stop",v:1,c:"r"},{t:"No",v:0,c:"g"}]);
+ if(!v)return;c.end=key(new Date());c.endAt=Date.now();save();render()}
+function fmtDT(ts){const d=new Date(ts);return d.getDate()+" "+MN[d.getMonth()].slice(0,3)+" "+d.getFullYear()+" · "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
+function consView(root){
+ stopListen();
+ const w=el("div","cview");
+ w.append(el("p","chint","Tasks added here repeat automatically every day, starting today. They can never be deleted. They can only be stopped, and stopped tasks stay listed below."));
+ const f=el("div","add cadd"),i=el("input");i.placeholder="Write a new consistency task";
+ const mic=el("button","mic");mic.type="button";mic.innerHTML=MIC+"<span>Speak</span>";
+ const b=el("button","addb","Add");
+ const add=txt=>{const v=(typeof txt==="string"?txt:i.value).trim();if(!v)return;const n=new Date();
+  (S.cons=S.cons||[]).push({id:"c"+n.getTime()+Math.floor(Math.random()*1e4),text:v,start:key(n),at:n.getTime()});
+  save();ensureAlerts(false);render()};
+ b.onclick=()=>add();i.onkeydown=e=>{if(e.key==="Enter")add()};mic.onclick=()=>listen(mic,i,v=>add(v));
+ f.append(i,mic,b);w.append(f);
+ const all=(S.cons||[]).slice().sort((a,b)=>b.at-a.at),act=all.filter(c=>!c.end),off=all.filter(c=>c.end);
+ w.append(el("h3","chd","Active ("+act.length+")"));
+ if(!act.length)w.append(el("div","empty","No active consistency tasks yet."));
+ act.forEach(c=>{const r=el("div","ctask"),t=el("div","ct1");t.append(el("div","t",c.text),el("div","cm","Added: "+fmtDT(c.at)),el("div","cm","Repeats every day"));
+  const sb=el("button","cstop","Stop");sb.onclick=()=>stopCons(c);r.append(t,sb);w.append(r)});
+ if(off.length){w.append(el("h3","chd","Stopped ("+off.length+")"));
+  off.forEach(c=>{const r=el("div","ctask stopped"),t=el("div","ct1");t.append(el("div","t",c.text),el("div","cm","Added: "+fmtDT(c.at)),el("div","cm","Stopped: "+fmtDT(c.endAt||c.at)));r.append(t);w.append(r)})}
+ root.append(w)}
+
 function taskPanel(box,k){
  box.innerHTML="";const list=S.tasks[k]||[];
- if(!list.length)box.append(el("div","empty","No tasks yet. Add your first one below."));
+ const cl=consOn(k);
+ if(!list.length&&!cl.length)box.append(el("div","empty","No tasks yet. Add your first one below."));
+ cl.forEach(c=>{const m=cmark(k,c),row=el("div","task cons s"+m),tx=el("div","t",c.text);tx.append(el("small","ctag","Daily"));row.append(tx);
+  const ok=el("button","mk"+(m?" on"+m:""));ok.setAttribute("aria-label","Mark task");ok.innerHTML=m===2?CROSS:TICK;
+  ok.onclick=async()=>{await markCons(k,c);taskPanel(box,k)};row.append(ok);box.append(row)});
  list.forEach(t=>{const row=el("div","task s"+(t.s||0));row.append(el("div","t",t.text));
   const ok=el("button","mk"+(t.s?" on"+t.s:""));ok.setAttribute("aria-label","Mark task");ok.innerHTML=t.s===2?CROSS:TICK;
   ok.onclick=async()=>{await markTask(k,t);taskPanel(box,k)};row.append(ok);box.append(row)});
@@ -5637,7 +5713,7 @@ function monthView(root){
  for(let i=0;i<first;i++)g.append(el("div","cell blank"));
  for(let d=1;d<=n;d++){const dt=new Date(y,m,d),k=key(dt),c=el("div","cell"+(S.done[k]?" done":"")+(bad(k)?" bad":"")+(k===todayK?" today":""));
   c.tabIndex=0;const ct=el("div","ct");ct.append(el("span","n"+(dt.getDay()===0&&k!==todayK?" sun":""),d),ring(k));c.append(ct);
-  const t=(S.tasks[k]||[]).length;if(t){const cn=el("span","cnt");cn.innerHTML="<b>"+t+"</b><em> task"+(t>1?"s":"")+"</em>";c.append(cn)}
+  const t=(S.tasks[k]||[]).length+consOn(k).length;if(t){const cn=el("span","cnt");cn.innerHTML="<b>"+t+"</b><em> task"+(t>1?"s":"")+"</em>";c.append(cn)}
   c.onclick=()=>openDay(k);c.onkeydown=e=>{if(e.key==="Enter")openDay(k)};g.append(c)}
  const rows=Math.ceil((first+n)/7);for(let i=first+n;i<rows*7;i++)g.append(el("div","cell blank"));
  g.style.setProperty("--rows",rows);
@@ -5658,14 +5734,16 @@ function dayView(root){
 
 function render(){
  const b=$("#body");b.innerHTML="";b.classList.toggle("mv",view==="month");
- if(view==="year"){$("#lbl").textContent=cur.getFullYear();yearView(b)}
+ $("#pill").classList.toggle("cons",view==="cons");
+ if(view==="cons"){$("#lbl").textContent="Consistency Tasks";consView(b)}
+ else if(view==="year"){$("#lbl").textContent=cur.getFullYear();yearView(b)}
  else if(view==="month"){$("#lbl").textContent=MN[cur.getMonth()]+" "+cur.getFullYear();monthView(b)}
  else{$("#lbl").textContent=`${DF[cur.getDay()]}, ${cur.getDate()} ${MN[cur.getMonth()]} ${cur.getFullYear()}`;dayView(b)}
  document.querySelectorAll("#drawer [data-v]").forEach(x=>x.classList.toggle("on",x.dataset.v===view))}
-function step(n){if(view==="year")cur.setFullYear(cur.getFullYear()+n);else if(view==="month"){cur.setDate(1);cur.setMonth(cur.getMonth()+n)}else cur.setDate(cur.getDate()+n);render()}
+function step(n){if(view==="cons")return;if(view==="year")cur.setFullYear(cur.getFullYear()+n);else if(view==="month"){cur.setDate(1);cur.setMonth(cur.getMonth()+n)}else cur.setDate(cur.getDate()+n);render()}
 $("#prev").onclick=()=>step(-1);$("#next").onclick=()=>step(1);
 
-const IC={year:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4M8 14h2M14 14h2M8 18h2M14 18h2"/>',month:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/>',day:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4M12 14v4"/>',bell:'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/>',today:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
+const IC={year:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4M8 14h2M14 14h2M8 18h2M14 18h2"/>',month:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/>',day:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4M12 14v4"/>',bell:'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/>',cons:'<path d="M17 2l4 4-4 4M3 11V9a3 3 0 013-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 01-3 3H3"/>',today:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
 /* ---- menu drawer (three lines, top-left) ---- */
 const drawer=$("#drawer"),side=$("#drawer .panel");
 const openMenu=()=>drawer.classList.add("open"),closeMenu=()=>drawer.classList.remove("open");
@@ -5674,8 +5752,9 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu()});
 const dh=el("div","dhead");dh.innerHTML=`<div class="logo"><svg viewBox="0 0 24 24">${IC.year}</svg></div><div><b>My Calendar</b><small>Menu</small></div>`;side.append(dh);
 const mkItem=(icon,name,fn,extra)=>{const b=el("button","ditem");b.innerHTML=`<svg viewBox="0 0 24 24">${icon}</svg><span>${name}</span>`;b.onclick=()=>{closeMenu();fn()};if(extra)extra(b);side.append(b);return b};
 [["year","Year view"],["month","Month view"],["day","Day view"]].forEach(([v,n])=>mkItem(IC[v],n,()=>{view=v;render()},b=>b.dataset.v=v));
+mkItem(IC.cons,"Consistency Tasks",()=>{view="cons";render()},b=>b.dataset.v="cons");
 side.append(el("div","dsep"));
-mkItem(IC.today,"Go to Today",()=>{cur=new Date();cur.setHours(12,0,0,0);render()});
+mkItem(IC.today,"Go to Today",()=>{cur=new Date();cur.setHours(12,0,0,0);if(view==="cons")view="month";render()});
 mkItem(IC.bell,"Reminders",alertsMenu,b=>b.id="bell");
 side.append(el("div","dsp"));
 mkItem('<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>',"Log out",logout);
