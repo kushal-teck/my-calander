@@ -19,7 +19,9 @@ export default async () => {
       const p = Object.fromEntries(f.formatToParts(new Date()).map((x) => [x.type, x.value]));
       if (!HOURS.includes(+p.hour)) { keep.push(s); continue; }
       st ??= (await data.get(key, { type: "json" })) || {};
-      const n = ((st.tasks || {})[`${p.year}-${p.month}-${p.day}`] || []).filter((t) => t.s !== 1).length;
+      const dk = `${p.year}-${p.month}-${p.day}`;
+      const consN = (st.cons || []).filter((c) => c.start <= dk && (!c.end || dk <= c.end) && (((st.cm || {})[dk] || {})[c.id] !== 1)).length;
+      const n = ((st.tasks || {})[dk] || []).filter((t) => t.s !== 1).length + consN;
       if (!n) { keep.push(s); continue; }
       try {
         await webpush.sendNotification(s.sub, JSON.stringify({ title: "Complete your tasks", body: `You have ${n} task${n > 1 ? "s" : ""} pending today.` }), { urgency: "high", TTL: 43200 });
