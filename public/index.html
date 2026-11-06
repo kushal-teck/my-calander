@@ -60,15 +60,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-of
 .add .mic svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .add .mic.rec{background:var(--red);border-color:var(--red);animation:pulse 1.2s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,90,110,.6)}100%{box-shadow:0 0 0 14px rgba(255,90,110,0)}}
-.cell .n{font-size:16px;font-weight:700;display:inline-block;min-width:28px;text-align:center;padding:2px 0;border-radius:10px}
+.cell .n{font-size:26px;font-weight:800;display:inline-block;min-width:40px;text-align:center;padding:2px 0;border-radius:10px}
 .cell.today .n{background:#fff;color:#0a0f1f}
 .cell.done{background:linear-gradient(145deg,rgba(46,230,160,.32),rgba(46,230,160,.12));border-color:rgba(46,230,160,.7)}
 .cell.bad{background:linear-gradient(145deg,rgba(255,90,110,.40),rgba(255,90,110,.14));border-color:rgba(255,90,110,.8)}
 .cell .cnt{position:absolute;left:12px;bottom:9px;font-size:11px;font-weight:600;color:var(--mut)}
-.ring{position:absolute;top:9px;right:9px;width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.35);display:grid;place-items:center;transition:.2s}
-.ring svg{display:block;width:16px;height:16px;stroke:#06281c;stroke-width:3.2;fill:none;opacity:0;stroke-linecap:round;stroke-linejoin:round}
-.ring:hover{border-color:var(--grn)}
-.done .ring{background:var(--grn);border-color:var(--grn)}.done .ring svg{opacity:1}
 .year{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .mini{border-radius:20px;padding:14px}
 .mini h4{font-size:15px;margin-bottom:8px;cursor:pointer;font-weight:700}
@@ -82,7 +78,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-of
 .daycard.done{border-color:rgba(46,230,160,.7);box-shadow:0 0 0 1px rgba(46,230,160,.3),0 20px 50px rgba(46,230,160,.12)}
 .daycard.bad{border-color:rgba(255,90,110,.8);box-shadow:0 0 0 1px rgba(255,90,110,.3),0 20px 50px rgba(255,90,110,.14)}
 .dayhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.dayhead .ring{position:static;width:38px;height:38px}.dayhead .ring svg{width:20px;height:20px}
 .task{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;border-radius:16px;background:var(--glass);border:1px solid var(--line);transition:.2s}
 .task .t{flex:1;word-break:break-word;font-weight:500}
 .task.s1{background:rgba(46,230,160,.12);border-color:rgba(46,230,160,.45)}
@@ -124,9 +119,7 @@ body{height:100vh;height:100dvh;overflow:hidden}
 #lbl{flex:1;min-width:0;font-size:clamp(12px,3.4vw,16px);line-height:1.25;overflow-wrap:anywhere}
 .wk,.grid{grid-template-columns:repeat(7,minmax(0,1fr))}
 .cell{min-width:0;padding:6px;min-height:clamp(54px,8vw,100px);overflow:hidden}
-.cell .n{font-size:clamp(11px,3.2vw,17px);min-width:0;padding:2px 5px}
-.ring{width:clamp(16px,2.6vw,26px);height:clamp(16px,2.6vw,26px);top:6px;right:6px}
-.ring svg{width:60%;height:60%}
+.cell .n{font-size:clamp(15px,4.6vw,26px);min-width:0;padding:2px 5px}
 .cnt{left:6px;bottom:5px;white-space:nowrap}
 .cnt em{font-style:normal}
 .year{grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr))}
@@ -140,8 +133,7 @@ dialog{max-height:88vh;max-height:88dvh}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 .cell{display:flex;flex-direction:column;justify-content:space-between;gap:3px;padding:clamp(3px,1.1vw,10px);min-height:clamp(50px,9vw,100px);min-width:0;overflow:hidden}
 .ct{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:3px;min-width:0}
-.cell .n{font-size:clamp(10px,2.8vw,17px);line-height:1.3;padding:1px 5px;min-width:0}
-.ring{position:static;top:auto;right:auto;flex:none;width:clamp(15px,2.4vw,26px);height:clamp(15px,2.4vw,26px)}
+.cell .n{font-size:clamp(15px,4.6vw,26px);line-height:1.3;padding:1px 5px;min-width:0}
 .cell .cnt{position:static;font-size:clamp(9px,2.1vw,11px);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cnt em{font-style:normal}
 .cnt b{background:var(--glass2);border-radius:8px;padding:1px 6px}
@@ -176,7 +168,6 @@ input{font-size:16px}
 .mview .cell{padding:5px 2px;border-radius:12px;align-items:center;justify-content:center;gap:3px}
 .ct{flex-direction:column;align-items:center;gap:3px}
 .cell .n{font-size:20px;font-weight:800;line-height:1.2;min-width:32px;padding:2px 0;text-align:center}
-.ring{width:22px;height:22px}
 .cell .cnt{font-size:11px;text-align:center}
 .cnt b{padding:1px 7px;font-size:12px}
 .year{grid-template-columns:1fr;gap:14px}
@@ -221,6 +212,7 @@ const $=s=>document.querySelector(s);
 const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const consOn=k=>(S.cons||[]).filter(c=>c.start<=k&&(!c.end||k<=c.end));
 const cmark=(k,c)=>((S.cm||{})[k]||{})[c.id]||0;
+const isDone=k=>{const t=S.tasks[k]||[],c=consOn(k);return t.length+c.length>0&&t.every(x=>x.s===1)&&c.every(x=>cmark(k,x)===1)};
 const bad=k=>(S.tasks[k]||[]).some(t=>t.s!==1)||(k<=todayK&&consOn(k).some(c=>cmark(k,c)!==1));
 const todayK=key(new Date());
 function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
@@ -295,11 +287,6 @@ async function alertsMenu(){
 function ask(msg,opts){return new Promise(res=>{const d=el("dialog");d.append(el("p","",msg));const r=el("div","row");
 opts.forEach(o=>{const b=el("button",o.c||"",o.t);b.onclick=()=>{d.close();d.remove();res(o.v)};r.append(b)});d.append(r);
 d.oncancel=()=>{d.remove();res(null)};document.body.append(d);d.showModal()})}
-
-async function toggleDone(k){
- if(!S.done[k])S.done[k]=1;
- else if(await ask("Do you want to turn this day off?",[{t:"Yes",v:1,c:"y"},{t:"No",v:0,c:"g"}]))delete S.done[k];
- save();render()}
 
 async function markTask(k,task){
  if(!task.s)task.s=1;
@@ -5706,13 +5693,12 @@ function openDay(k){
  dlg.append(h,box,c);dlg.onclose=()=>{stopListen();dlg.remove()};document.body.append(dlg);taskPanel(box,k);dlg.showModal()}
 
 /* ---- views ---- */
-function ring(k){const r=el("button","ring");r.innerHTML=TICK;r.setAttribute("aria-label","Mark day complete");r.onclick=e=>{e.stopPropagation();toggleDone(k)};return r}
 function monthView(root){
  const mv=el("div","mview"),w=el("div","wk");DN.forEach(n=>w.append(el("div","",n)));mv.append(w);
  const g=el("div","grid"),y=cur.getFullYear(),m=cur.getMonth(),first=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();
  for(let i=0;i<first;i++)g.append(el("div","cell blank"));
- for(let d=1;d<=n;d++){const dt=new Date(y,m,d),k=key(dt),c=el("div","cell"+(S.done[k]?" done":"")+(bad(k)?" bad":"")+(k===todayK?" today":""));
-  c.tabIndex=0;const ct=el("div","ct");ct.append(el("span","n"+(dt.getDay()===0&&k!==todayK?" sun":""),d),ring(k));c.append(ct);
+ for(let d=1;d<=n;d++){const dt=new Date(y,m,d),k=key(dt),c=el("div","cell"+(isDone(k)?" done":"")+(bad(k)?" bad":"")+(k===todayK?" today":""));
+  c.tabIndex=0;const ct=el("div","ct");ct.append(el("span","n"+(dt.getDay()===0&&k!==todayK?" sun":""),d));c.append(ct);
   const t=(S.tasks[k]||[]).length+consOn(k).length;if(t){const cn=el("span","cnt");cn.innerHTML="<b>"+t+"</b><em> task"+(t>1?"s":"")+"</em>";c.append(cn)}
   c.onclick=()=>openDay(k);c.onkeydown=e=>{if(e.key==="Enter")openDay(k)};g.append(c)}
  const rows=Math.ceil((first+n)/7);for(let i=first+n;i<rows*7;i++)g.append(el("div","cell blank"));
@@ -5724,12 +5710,12 @@ function yearView(root){
   const g=el("div","grid");DN.forEach((n,i)=>g.append(el("span",i===0?"sun":"",n[0])));
   const first=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();
   for(let i=0;i<first;i++)g.append(el("span"));
-  for(let d=1;d<=n;d++){const dt=new Date(y,m,d),k=key(dt),s=el("span",(dt.getDay()===0?"sun ":"")+(S.done[k]?"done ":"")+(bad(k)?"bad":""),d);s.onclick=()=>openDay(k);g.append(s)}
+  for(let d=1;d<=n;d++){const dt=new Date(y,m,d),k=key(dt),s=el("span",(dt.getDay()===0?"sun ":"")+(isDone(k)?"done ":"")+(bad(k)?"bad":""),d);s.onclick=()=>openDay(k);g.append(s)}
   card.append(g);wrap.append(card)}
  root.append(wrap)}
 function dayView(root){
- const k=key(cur),c=el("div","daycard glass"+(S.done[k]?" done":"")+(bad(k)?" bad":"")),h=el("div","dayhead"),t=el("div",cur.getDay()===0?"sun":"",`${cur.getDate()} ${MN[cur.getMonth()]} ${cur.getFullYear()}`);
- t.style.cssText="font-size:22px;font-weight:800";h.append(t,ring(k));
+ const k=key(cur),c=el("div","daycard glass"+(isDone(k)?" done":"")+(bad(k)?" bad":"")),h=el("div","dayhead"),t=el("div",cur.getDay()===0?"sun":"",`${cur.getDate()} ${MN[cur.getMonth()]} ${cur.getFullYear()}`);
+ t.style.cssText="font-size:30px;font-weight:800";h.append(t);
  const box=el("div");c.append(h,box);root.append(c);taskPanel(box,k)}
 
 function render(){
